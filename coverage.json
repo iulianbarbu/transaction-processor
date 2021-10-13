@@ -1,0 +1,20 @@
+{
+  "files": [
+    {"file": "/home/iulian/transaction-processor/src/main.rs", "percent_covered": "6.25", "covered_lines": "1", "total_lines": "16"},
+    {"file": "/usr/lib/gcc/x86_64-linux-gnu/6/include/smmintrin.h", "percent_covered": "0.00", "covered_lines": "0", "total_lines": "3"},
+    {"file": "/home/iulian/transaction-processor/src/input/mod.rs", "percent_covered": "95.00", "covered_lines": "38", "total_lines": "40"},
+    {"file": "/home/iulian/transaction-processor/src/transaction/mod.rs", "percent_covered": "75.76", "covered_lines": "175", "total_lines": "231"},
+    {"file": "/usr/lib/gcc/x86_64-linux-gnu/6/include/emmintrin.h", "percent_covered": "0.00", "covered_lines": "0", "total_lines": "2"},
+    {"file": "/home/iulian/transaction-processor/src/lib.rs", "percent_covered": "100.00", "covered_lines": "1", "total_lines": "1"},
+    {"file": "/home/iulian/transaction-processor/src/account/mod.rs", "percent_covered": "52.23", "covered_lines": "152", "total_lines": "291"},
+    {"file": "/usr/lib/gcc/x86_64-linux-gnu/6/include/tmmintrin.h", "percent_covered": "0.00", "covered_lines": "0", "total_lines": "1"},
+    {"file": "/home/iulian/transaction-processor/src/logger/mod.rs", "percent_covered": "0.00", "covered_lines": "0", "total_lines": "12"}
+  ],
+  "percent_covered": "61.47",
+  "covered_lines": 367,
+  "total_lines": 597,
+  "percent_low": 25,
+  "percent_high": 75,
+  "command": "",
+  "date": "2021-10-13 22:26:01"
+}

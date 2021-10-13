@@ -1,0 +1,26 @@
+[package]
+name = "transaction-processor"
+version = "0.1.0"
+authors = ["Iulian Barbu <ibarbu@adobe.com>"]
+edition = "2018"
+
+[lib]
+name = "transaction_processor"
+path = "src/lib.rs"
+
+[[bin]]
+name = "transaction-processor"
+path = "src/main.rs"
+
+[dependencies]
+csv = "1.1.6"
+tokio = { version = "1.12.*", features = ["full"] }
+log = "0.4.*"
+
+[dev-dependencies]
+tempfile = "3.2.0"
+criterion = "0.3"
+
+[[bench]]
+name = "tx_processor_bench"
+harness = false
