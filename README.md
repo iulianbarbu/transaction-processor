@@ -23,7 +23,7 @@ output is a set of accounts, printed line by line, with respect to the schema
 Running the unit tests can be done by `cargo test`. The test are covering all
 the units of the project, except for the ones from the `logger` module and the 
 `drill` orphan function, present in transaction module, which is exercised 
-mainly in *integration contest*, during the benchmarks tests and put out for
+mainly in *integration context*, during the benchmarks tests and put out for
 manipulating the tokio asynchronous runtime and the abstractions introduced by
 the project.
 
@@ -35,7 +35,7 @@ found in [coverage.json](coverage.json).
 ## Benchmarks
 
 The purpose of the existing implemented benchmarks are exercising the
-transaction processing in terms of scalability and aynchronous multi-threaded
+transaction processing in terms of scalability and asynchronous multi-threaded
 runtime. Two performance tests were separated in two groups:
 * `small-inputs`
 * `large-inputs`
@@ -45,9 +45,9 @@ all transaction types have the same cost, so it does not matter what type of
 transaction we use to showcase the scalability and multi-threaded runtime at 
 action. In order to really make use of the multi-threaded environment in a 
 setup that does not involve millions of transactions, the transaction execution 
-supports interferring into the execution of a transaction, by delaying it with
+supports interfering into the execution of a transaction, by delaying it with
 a 100 millis for every executed transaction. This enables greater contention
-on system resources, in the period of time the transcation is delayed, because
+on system resources, in the period of time the transaction is delayed, because
 the transaction processor wants to fulfil other transaction at the same time.
 
 Running all the benchmarks can be done by: `cargo bench`. Benchmarks run on a

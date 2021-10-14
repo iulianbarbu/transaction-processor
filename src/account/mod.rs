@@ -296,13 +296,14 @@ mod tests {
         let (sender, receiver) = tokio::sync::mpsc::channel(32);
         let rt = tokio::runtime::Runtime::new().unwrap();
         rt.block_on(async {
-            let mut client = AccountAdmin::new(1, receiver);
+            let mut account_admin = AccountAdmin::new(1, receiver);
             sender.send(Transaction::new_with_amount(Type::Deposit, 1, 0, 1.0)).await.unwrap();
-            client.handle().await.unwrap();
-            assert_eq!(client.account().available(), 1.0);
-            assert_eq!(client.account().held(), 0.0);
-            assert_eq!(client.account().is_locked(), false);
-            assert!(client.tx_history.contains_key(&0));
+            account_admin.handle().await.unwrap();
+            assert_eq!(account_admin.account().available(), 1.0);
+            assert_eq!(account_admin.account().held(), 0.0);
+            assert_eq!(account_admin.account().total(), 1.0);
+            assert_eq!(account_admin.account().is_locked(), false);
+            assert!(account_admin.tx_history.contains_key(&0));
         });
     }
 
@@ -311,14 +312,15 @@ mod tests {
         let (sender, receiver) = tokio::sync::mpsc::channel(32);
         let rt = tokio::runtime::Runtime::new().unwrap();
         rt.block_on(async {
-            let mut client = AccountAdmin::new(1, receiver);
-            client.account.available = 2.0;
+            let mut account_admin = AccountAdmin::new(1, receiver);
+            account_admin.account.available = 2.0;
             sender.send(Transaction::new_with_amount(Type::Withdrawal, 1, 0, 1.0)).await.unwrap();
-            client.handle().await.unwrap();
-            assert_eq!(client.account().available(), 1.0);
-            assert_eq!(client.account().held(), 0.0);
-            assert_eq!(client.account().is_locked(), false);
-            assert!(client.tx_history.contains_key(&0));
+            account_admin.handle().await.unwrap();
+            assert_eq!(account_admin.account().available(), 1.0);
+            assert_eq!(account_admin.account().held(), 0.0);
+            assert_eq!(account_admin.account().total(), 1.0);
+            assert_eq!(account_admin.account().is_locked(), false);
+            assert!(account_admin.tx_history.contains_key(&0));
         });
     }
 
@@ -327,23 +329,24 @@ mod tests {
         let (sender, receiver) = tokio::sync::mpsc::channel(32);
         let rt = tokio::runtime::Runtime::new().unwrap();
         rt.block_on(async {
-            let mut client = AccountAdmin::new(1, receiver);
-            client.account.available = 2.0;
-            client.tx_history.insert(0, Transaction::new_with_amount(Type::Deposit, 1, 0, 2.0));
+            let mut account_admin = AccountAdmin::new(1, receiver);
+            account_admin.account.available = 2.0;
+            account_admin.tx_history.insert(0, Transaction::new_with_amount(Type::Deposit, 1, 0, 2.0));
             sender.send(Transaction::new(Type::Dispute, 1, 0)).await.unwrap();
-            client.handle().await.unwrap();
-            assert_eq!(client.account().available(), 0.0);
-            assert_eq!(client.account().held(), 2.0);
-            assert_eq!(client.account().is_locked(), false);
-            assert!(client.tx_history.get(&0).unwrap().is_disputed());
-            assert!(!client.tx_history.get(&0).unwrap().is_resolved());
-            assert!(!client.tx_history.get(&0).unwrap().is_charged_back());
+            account_admin.handle().await.unwrap();
+            assert_eq!(account_admin.account().available(), 0.0);
+            assert_eq!(account_admin.account().held(), 2.0);
+            assert_eq!(account_admin.account().is_locked(), false);
+            assert_eq!(account_admin.account().total(), 2.0);
+            assert!(account_admin.tx_history.get(&0).unwrap().is_disputed());
+            assert!(!account_admin.tx_history.get(&0).unwrap().is_resolved());
+            assert!(!account_admin.tx_history.get(&0).unwrap().is_charged_back());
             sender.send(Transaction::new(Type::Dispute, 1, 0)).await.unwrap();
-            assert!(client.handle().await.is_err());
-            client.tx_history.get_mut(&0).unwrap().clear_flags();
-            client.account.set_locked(true);
+            assert!(account_admin.handle().await.is_err());
+            account_admin.tx_history.get_mut(&0).unwrap().clear_flags();
+            account_admin.account.set_locked(true);
             sender.send(Transaction::new(Type::Dispute, 1, 0)).await.unwrap();
-            assert!(client.handle().await.is_err());
+            assert!(account_admin.handle().await.is_err());
         });
     }
 
@@ -352,24 +355,25 @@ mod tests {
         let (sender, receiver) = tokio::sync::mpsc::channel(32);
         let rt = tokio::runtime::Runtime::new().unwrap();
         rt.block_on(async {
-            let mut client = AccountAdmin::new(1, receiver);
-            client.account.held = 2.0;
-            client.tx_history.insert(0, Transaction::new_with_amount(Type::Deposit, 1, 0, 2.0));
-            client.tx_history.get_mut(&0).unwrap().mark_disputed();
+            let mut account_admin = AccountAdmin::new(1, receiver);
+            account_admin.account.held = 2.0;
+            account_admin.tx_history.insert(0, Transaction::new_with_amount(Type::Deposit, 1, 0, 2.0));
+            account_admin.tx_history.get_mut(&0).unwrap().mark_disputed();
             sender.send(Transaction::new(Type::Resolve, 1, 0)).await.unwrap();
-            client.handle().await.unwrap();
-            assert_eq!(client.account().held(), 0.0);
-            assert_eq!(client.account().available(), 2.0);
-            assert_eq!(client.account().is_locked(), false);
-            assert!(!client.tx_history.get(&0).unwrap().is_disputed());
-            assert!(client.tx_history.get(&0).unwrap().is_resolved());
-            assert!(!client.tx_history.get(&0).unwrap().is_charged_back());
+            account_admin.handle().await.unwrap();
+            assert_eq!(account_admin.account().held(), 0.0);
+            assert_eq!(account_admin.account().available(), 2.0);
+            assert_eq!(account_admin.account().total(), 2.0);
+            assert_eq!(account_admin.account().is_locked(), false);
+            assert!(!account_admin.tx_history.get(&0).unwrap().is_disputed());
+            assert!(account_admin.tx_history.get(&0).unwrap().is_resolved());
+            assert!(!account_admin.tx_history.get(&0).unwrap().is_charged_back());
             sender.send(Transaction::new(Type::Resolve, 1, 0)).await.unwrap();
-            assert!(client.handle().await.is_err());
-            client.tx_history.get_mut(&0).unwrap().clear_flags();
-            client.account.set_locked(true);
+            assert!(account_admin.handle().await.is_err());
+            account_admin.tx_history.get_mut(&0).unwrap().clear_flags();
+            account_admin.account.set_locked(true);
             sender.send(Transaction::new(Type::Resolve, 1, 0)).await.unwrap();
-            assert!(client.handle().await.is_err());
+            assert!(account_admin.handle().await.is_err());
         });
     }
 
@@ -378,27 +382,28 @@ mod tests {
         let (sender, receiver) = tokio::sync::mpsc::channel(32);
         let rt = tokio::runtime::Runtime::new().unwrap();
         rt.block_on(async {
-            let mut client = AccountAdmin::new(1, receiver);
-            client.account.held = 2.0;
-            client.tx_history.insert(0, Transaction::new_with_amount(Type::Deposit, 1, 0, 2.0));
-            client.tx_history.get_mut(&0).unwrap().mark_disputed();
+            let mut account_admin = AccountAdmin::new(1, receiver);
+            account_admin.account.held = 2.0;
+            account_admin.tx_history.insert(0, Transaction::new_with_amount(Type::Deposit, 1, 0, 2.0));
+            account_admin.tx_history.get_mut(&0).unwrap().mark_disputed();
             sender.send(Transaction::new(Type::Chargeback, 1, 0)).await.unwrap();
-            client.handle().await.unwrap();
-            assert_eq!(client.account().held(), 0.0);
-            assert_eq!(client.account().available(), 0.0);
-            assert_eq!(client.account().is_locked(), true);
-            assert_eq!(client.tx_history.get(&0).unwrap().is_disputed(), false);
-            assert_eq!(client.tx_history.get(&0).unwrap().is_resolved(), false);
-            assert_eq!(client.tx_history.get(&0).unwrap().is_charged_back(), true);
+            account_admin.handle().await.unwrap();
+            assert_eq!(account_admin.account().held(), 0.0);
+            assert_eq!(account_admin.account().available(), 0.0);
+            assert_eq!(account_admin.account().total(), 0.0);
+            assert_eq!(account_admin.account().is_locked(), true);
+            assert_eq!(account_admin.tx_history.get(&0).unwrap().is_disputed(), false);
+            assert_eq!(account_admin.tx_history.get(&0).unwrap().is_resolved(), false);
+            assert_eq!(account_admin.tx_history.get(&0).unwrap().is_charged_back(), true);
             // Try to charge back the same transaction again results in error, because it was already
             // disputed.
             sender.send(Transaction::new(Type::Chargeback, 1, 0)).await.unwrap();
-            assert!(client.handle().await.is_err());
-            client.tx_history.get_mut(&0).unwrap().clear_flags();
+            assert!(account_admin.handle().await.is_err());
+            account_admin.tx_history.get_mut(&0).unwrap().clear_flags();
             // Even if the transaction flags are cleared, the account is locked after a `chargeback`,
             // so retrying the operation again result in error.
             sender.send(Transaction::new(Type::Chargeback, 1, 0)).await.unwrap();
-            assert!(client.handle().await.is_err());
+            assert!(account_admin.handle().await.is_err());
         });
     }
 

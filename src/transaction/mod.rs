@@ -262,14 +262,14 @@ pub fn drill(input: Input, multi_threaded_runtime: bool, tx_delay: Option<Durati
 
         if dump_accounts {
             // Print the accounts contents.
-            println!("client,available,held,locked");
+            println!("client,available,held,total,locked");
         }
 
         for handle in worker_handlers {
             let res = handle.await.unwrap();
             match res {
                 Some(account) => if dump_accounts {
-                    println!("{},{:.4},{:.4},{}", account.client_id(), account.available(), account.held(), account.is_locked());
+                    println!("{},{:.4},{:.4},{:.4},{}", account.client_id(), account.available(), account.held(), account.total(), account.is_locked());
                 }
                 None => unreachable!()
             };
