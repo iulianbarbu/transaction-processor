@@ -16,7 +16,7 @@ Running the binary, that processes a set of transactions described in a regular
 text file, on local filesystem, can be done by: 
 `cargo run -- <filename path relative to cargo project root>`. The binary
 output is a set of accounts, printed line by line, with respect to the schema
-`client,available,held,locked`.
+`client,available,held,total,locked`.
 
 ## Testing
 
